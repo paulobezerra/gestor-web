@@ -298,21 +298,21 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
       </CardHeader>
       <CardContent>
         <!-- PASSO 1 -->
-        <form v-if="step === 1" @submit="onStep1" novalidate class="space-y-4">
-          <Alert v-if="error1" variant="destructive" class="mb-4" role="alert">
+        <form v-if="step === 1" @submit="onStep1" novalidate class="space-y-4" data-cy="registro-form-step1">
+          <Alert v-if="error1" variant="destructive" class="mb-4" role="alert" data-cy="registro-error1">
             <AlertDescription>{{ error1 }}</AlertDescription>
           </Alert>
 
           <div class="space-y-2">
             <Label for="email1">E-mail</Label>
-            <Input id="email1" type="email" v-model="email1" v-bind="email1Attrs" placeholder="voce@exemplo.com" autocomplete="email" :aria-invalid="!!form1.errors.value.email" />
+            <Input id="email1" data-cy="registro-email" type="email" v-model="email1" v-bind="email1Attrs" placeholder="voce@exemplo.com" autocomplete="email" :aria-invalid="!!form1.errors.value.email" />
             <p v-if="form1.errors.value.email" class="text-sm text-destructive" role="alert">{{ form1.errors.value.email }}</p>
           </div>
 
           <div class="space-y-2">
             <Label for="senha1">Senha</Label>
             <div class="relative">
-              <Input id="senha1" :type="showSenha1 ? 'text' : 'password'" v-model="senha1" v-bind="senha1Attrs" placeholder="Mínimo 8 caracteres" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.senha" />
+              <Input id="senha1" data-cy="registro-senha" :type="showSenha1 ? 'text' : 'password'" v-model="senha1" v-bind="senha1Attrs" placeholder="Mínimo 8 caracteres" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.senha" />
               <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground" @click="showSenha1 = !showSenha1" :aria-label="showSenha1 ? 'Ocultar senha' : 'Mostrar senha'">
                 <EyeOff v-if="showSenha1" class="size-4" /><Eye v-else class="size-4" />
               </button>
@@ -323,7 +323,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
           <div class="space-y-2">
             <Label for="conf1">Confirmar senha</Label>
             <div class="relative">
-              <Input id="conf1" :type="showConf1 ? 'text' : 'password'" v-model="conf1" v-bind="conf1Attrs" placeholder="Repita a senha" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.confirmacao" />
+              <Input id="conf1" data-cy="registro-confirmacao" :type="showConf1 ? 'text' : 'password'" v-model="conf1" v-bind="conf1Attrs" placeholder="Repita a senha" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.confirmacao" />
               <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground" @click="showConf1 = !showConf1" :aria-label="showConf1 ? 'Ocultar confirmação' : 'Mostrar confirmação'">
                 <EyeOff v-if="showConf1" class="size-4" /><Eye v-else class="size-4" />
               </button>
@@ -331,7 +331,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
             <p v-if="form1.errors.value.confirmacao" class="text-sm text-destructive" role="alert">{{ form1.errors.value.confirmacao }}</p>
           </div>
 
-          <Button type="submit" class="w-full" :disabled="loading1" :aria-busy="loading1">
+          <Button type="submit" class="w-full" :disabled="loading1" :aria-busy="loading1" data-cy="registro-proximo">
             <span v-if="loading1" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
             {{ loading1 ? 'Criando conta...' : 'Próximo' }}
           </Button>
@@ -345,6 +345,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               type="button"
               :variant="tipoPessoa === 'FISICA' ? 'default' : 'outline'"
               class="flex-1"
+              data-cy="tipo-fisica"
               @click="tipoPessoa = 'FISICA'"
             >
               Pessoa Física
@@ -353,13 +354,14 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               type="button"
               :variant="tipoPessoa === 'JURIDICA' ? 'default' : 'outline'"
               class="flex-1"
+              data-cy="tipo-juridica"
               @click="tipoPessoa = 'JURIDICA'"
             >
               Pessoa Jurídica
             </Button>
           </div>
 
-          <Alert v-if="error2" variant="destructive" class="mb-4" role="alert">
+          <Alert v-if="error2" variant="destructive" class="mb-4" role="alert" data-cy="registro-error2">
             <AlertDescription>{{ error2 }}</AlertDescription>
           </Alert>
 
@@ -437,7 +439,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2">
+            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2" data-cy="registro-criar-empresa">
               <span v-if="loading2" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
               {{ loading2 ? 'Criando empresa...' : 'Criar empresa' }}
             </Button>
@@ -580,7 +582,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2">
+            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2" data-cy="registro-criar-empresa">
               <span v-if="loading2" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
               {{ loading2 ? 'Criando empresa...' : 'Criar empresa' }}
             </Button>

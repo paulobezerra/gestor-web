@@ -57,7 +57,7 @@ const onSubmit = handleSubmit(async (values) => {
         <CardDescription>Acesse sua conta do Gestor</CardDescription>
       </CardHeader>
       <CardContent>
-        <Alert v-if="apiError" variant="destructive" class="mb-4" role="alert">
+        <Alert v-if="apiError" variant="destructive" class="mb-4" role="alert" data-cy="login-error">
           <AlertDescription>{{ apiError }}</AlertDescription>
         </Alert>
 
@@ -66,6 +66,7 @@ const onSubmit = handleSubmit(async (values) => {
             <Label for="email">E-mail</Label>
             <Input
               id="email"
+              data-cy="login-email"
               type="email"
               v-model="email"
               v-bind="emailAttrs"
@@ -84,6 +85,7 @@ const onSubmit = handleSubmit(async (values) => {
             <div class="relative">
               <Input
                 id="senha"
+                data-cy="login-senha"
                 :type="showPassword ? 'text' : 'password'"
                 v-model="senha"
                 v-bind="senhaAttrs"
@@ -114,7 +116,7 @@ const onSubmit = handleSubmit(async (values) => {
             </a>
           </div>
 
-          <Button type="submit" class="w-full" :disabled="loading" :aria-busy="loading">
+          <Button type="submit" class="w-full" :disabled="loading" :aria-busy="loading" data-cy="login-submit">
             <span v-if="loading" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
             {{ loading ? 'Entrando...' : 'Entrar' }}
           </Button>

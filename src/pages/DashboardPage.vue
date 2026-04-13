@@ -36,6 +36,7 @@ const cards = [
       <Alert
         v-if="authStore.hasRole('ADMINISTRADOR') && empresaStore.empresa?.statusAsaas === 'NAO_CONFIGURADO'"
         class="mb-6"
+        data-cy="banner-asaas"
       >
         <AlertTriangle class="size-4" />
         <AlertTitle>Integração de pagamentos não configurada</AlertTitle>

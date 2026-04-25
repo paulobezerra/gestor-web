@@ -62,3 +62,29 @@ export interface InquilinoResp {
   cnpj?: string
   statusAsaas: StatusAsaas
 }
+
+export interface InquilinoDetalhe extends InquilinoResp {
+  email: string
+  ddd: string
+  telefone: string
+  logradouro: string
+  numero: string
+  complemento?: string
+  bairro: string
+  cidade: string
+  estado: string
+  cep: string
+}
+
+export interface AtualizarContatoEnderecoReq {
+  email: string
+  ddd: string
+  telefone: string
+  logradouro: string
+  numero: string
+  complemento?: string
+  bairro: string
+  cidade: string
+  estado: string
+  cep: string
+}

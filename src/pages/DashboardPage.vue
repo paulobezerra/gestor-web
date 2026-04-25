@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Wrench, Calendar, DollarSign, AlertTriangle } from 'lucide-vue-next'
+import { Wrench, Calendar, DollarSign, AlertTriangle, Building2, Pencil } from 'lucide-vue-next'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -47,6 +47,24 @@ const cards = [
           </Button>
         </AlertDescription>
       </Alert>
+
+      <!-- Card da empresa -->
+      <Card v-if="authStore.hasRole('ADMINISTRADOR') && empresaStore.empresa" class="mb-6">
+        <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle class="flex items-center gap-2 text-base">
+            <Building2 class="size-4 text-muted-foreground" aria-hidden="true" />
+            {{ empresaStore.empresa.razaoSocial ?? empresaStore.empresa.nome }}
+          </CardTitle>
+          <Button variant="ghost" size="sm" @click="router.push('/configuracoes/empresa')">
+            <Pencil class="mr-1 size-3" />
+            Editar
+          </Button>
+        </CardHeader>
+        <CardContent class="text-sm text-muted-foreground">
+          {{ empresaStore.empresa.tipoPessoa === 'FISICA' ? 'Pessoa Física' : 'Pessoa Jurídica' }}
+          <span v-if="empresaStore.empresa.cnpj"> · CNPJ {{ empresaStore.empresa.cnpj }}</span>
+        </CardContent>
+      </Card>
 
       <!-- Cards de métricas -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

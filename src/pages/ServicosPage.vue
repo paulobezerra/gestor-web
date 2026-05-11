@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
@@ -70,18 +70,21 @@ const servicos = ref<ServicoResp[]>([])
 const loadingList = ref(false)
 const busca = ref('')
 const filtroStatus = ref<'todos' | 'ativo' | 'inativo'>('todos')
+let fetchSeq = 0
 
 async function fetchServicos() {
+  const seq = ++fetchSeq
   loadingList.value = true
   try {
     const ativo =
       filtroStatus.value === 'ativo' ? true : filtroStatus.value === 'inativo' ? false : undefined
     const { data } = await listarServicos({ ativo })
+    if (seq !== fetchSeq) return
     servicos.value = data.content
   } catch {
     toast.error('Erro ao carregar serviços.')
   } finally {
-    loadingList.value = false
+    if (seq === fetchSeq) loadingList.value = false
   }
 }
 
@@ -173,6 +176,7 @@ const salvarForm = handleSubmit(async (values) => {
       toast.success('Serviço criado.')
     }
     formOpen.value = false
+    await nextTick()
     await fetchServicos()
   } catch (err) {
     const ax = err as AxiosError<ProblemDetail>

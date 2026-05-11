@@ -176,6 +176,7 @@ async function executarToggle() {
 }
 
 const roleLabels: Record<Role, string> = {
+  SUPERUSUARIO: 'Superusuário',
   ADMINISTRADOR: 'Administrador',
   FINANCEIRO: 'Financeiro',
   TECNICO: 'Técnico',
@@ -183,6 +184,7 @@ const roleLabels: Record<Role, string> = {
 }
 
 const roleVariants: Record<Role, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  SUPERUSUARIO: 'default',
   ADMINISTRADOR: 'default',
   FINANCEIRO: 'secondary',
   TECNICO: 'outline',

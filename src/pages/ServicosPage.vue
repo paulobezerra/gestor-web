@@ -63,7 +63,7 @@ import type { ProblemDetail } from '@/types/api'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
-const podeEditar = computed(() => authStore.hasRole('ADMINISTRADOR', 'FINANCEIRO'))
+const podeEditar = computed(() => authStore.hasRole('SUPERUSUARIO', 'ADMINISTRADOR', 'FINANCEIRO'))
 
 // ---------- Listagem ----------
 const servicos = ref<ServicoResp[]>([])

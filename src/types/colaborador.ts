@@ -1,4 +1,4 @@
-export type Role = 'ADMINISTRADOR' | 'FINANCEIRO' | 'TECNICO' | 'RECEPCAO'
+export type Role = 'SUPERUSUARIO' | 'ADMINISTRADOR' | 'FINANCEIRO' | 'TECNICO' | 'RECEPCAO'
 
 export interface ColaboradorReq {
   nome: string

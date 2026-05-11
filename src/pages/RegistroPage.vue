@@ -6,6 +6,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import type { AxiosError } from 'axios'
 import { Eye, EyeOff } from 'lucide-vue-next'
+import { maskCpf, maskCnpj, maskCep, maskTelefone, maskHandler, stripMask } from '@/composables/useMask'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -83,17 +84,23 @@ const regimesOptions: { value: RegimeTributario; label: string }[] = [
   { value: 'NAO_TRIBUTADO', label: 'Não Tributado' },
 ]
 
+const zCpf = z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF inválido (000.000.000-00)')
+const zCnpj = z.string().regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, 'CNPJ inválido (00.000.000/0000-00)')
+const zCep = z.string().regex(/^\d{5}-\d{3}$/, 'CEP inválido (00000-000)')
+const zTelefone = z.string().regex(/^\d{4,5}-\d{4}$/, 'Telefone inválido')
+const zDdd = z.string().length(2, 'DDD inválido')
+
 // Schema pessoa física
 const schemaFisica = toTypedSchema(
   z.object({
     nome: z.string().min(2, 'Nome obrigatório'),
-    cpf: z.string().min(11, 'CPF inválido'),
+    cpf: zCpf,
     rg: z.string().min(5, 'RG inválido'),
     inscricaoMunicipal: z.string().min(1, 'Obrigatório'),
-    ddd: z.string().length(2, 'DDD inválido'),
-    telefone: z.string().min(8, 'Telefone inválido'),
+    ddd: zDdd,
+    telefone: zTelefone,
     emailContato: z.string().email('E-mail inválido'),
-    cep: z.string().min(8, 'CEP inválido'),
+    cep: zCep,
     logradouro: z.string().min(1, 'Obrigatório'),
     numero: z.string().min(1, 'Obrigatório'),
     complemento: z.string().optional(),
@@ -108,17 +115,17 @@ const schemaJuridica = toTypedSchema(
   z.object({
     razaoSocial: z.string().min(2, 'Obrigatório'),
     nomeFantasia: z.string().min(2, 'Obrigatório'),
-    cnpj: z.string().min(14, 'CNPJ inválido'),
+    cnpj: zCnpj,
     regimeTributario: z.enum(['MEI', 'SIMPLES', 'LUCRO_PRESUMIDO', 'LUCRO_REAL', 'NAO_TRIBUTADO']),
     inscricaoMunicipal: z.string().min(1, 'Obrigatório'),
     // Representante
     repNome: z.string().min(2, 'Obrigatório'),
-    repCpf: z.string().min(11, 'CPF inválido'),
+    repCpf: zCpf,
     repRg: z.string().min(5, 'RG inválido'),
-    repDdd: z.string().length(2, 'DDD inválido'),
-    repTelefone: z.string().min(8, 'Telefone inválido'),
+    repDdd: zDdd,
+    repTelefone: zTelefone,
     repEmail: z.string().email('E-mail inválido'),
-    repCep: z.string().min(8, 'CEP inválido'),
+    repCep: zCep,
     repLogradouro: z.string().min(1, 'Obrigatório'),
     repNumero: z.string().min(1, 'Obrigatório'),
     repComplemento: z.string().optional(),
@@ -126,11 +133,11 @@ const schemaJuridica = toTypedSchema(
     repCidade: z.string().min(1, 'Obrigatório'),
     repEstado: z.string().length(2, 'UF inválida'),
     // Contato empresa
-    ddd: z.string().length(2, 'DDD inválido'),
-    telefone: z.string().min(8, 'Telefone inválido'),
+    ddd: zDdd,
+    telefone: zTelefone,
     emailContato: z.string().email('E-mail inválido'),
     // Endereço empresa
-    cep: z.string().min(8, 'CEP inválido'),
+    cep: zCep,
     logradouro: z.string().min(1, 'Obrigatório'),
     numero: z.string().min(1, 'Obrigatório'),
     complemento: z.string().optional(),
@@ -194,13 +201,14 @@ const onStep2Fisica = formFisica.handleSubmit(async (v) => {
   loading2.value = true
   error2.value = null
   try {
+    await authStore.login(dadosAcesso.value.email, dadosAcesso.value.senha)
     await criarPessoaFisica({
       emailUsuario: dadosAcesso.value.email,
       nome: v.nome,
-      cpf: v.cpf,
+      cpf: stripMask(v.cpf),
       rg: v.rg,
       inscricaoMunicipal: v.inscricaoMunicipal,
-      contato: { ddd: v.ddd, telefone: v.telefone, email: v.emailContato },
+      contato: { ddd: v.ddd, telefone: stripMask(v.telefone), email: v.emailContato },
       endereco: {
         logradouro: v.logradouro,
         numero: v.numero,
@@ -208,10 +216,9 @@ const onStep2Fisica = formFisica.handleSubmit(async (v) => {
         bairro: v.bairro,
         cidade: v.cidade,
         estado: v.estado,
-        cep: v.cep,
+        cep: stripMask(v.cep),
       },
     })
-    await authStore.login(dadosAcesso.value.email, dadosAcesso.value.senha)
     router.push('/dashboard')
   } catch (err) {
     const ax = err as AxiosError<ProblemDetail>
@@ -225,18 +232,19 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
   loading2.value = true
   error2.value = null
   try {
+    await authStore.login(dadosAcesso.value.email, dadosAcesso.value.senha)
     await criarPessoaJuridica({
       emailUsuario: dadosAcesso.value.email,
       razaoSocial: v.razaoSocial,
       nomeFantasia: v.nomeFantasia,
-      cnpj: v.cnpj,
+      cnpj: stripMask(v.cnpj),
       regimeTributario: v.regimeTributario as RegimeTributario,
       inscricaoMunicipal: v.inscricaoMunicipal,
       representante: {
         nome: v.repNome,
-        cpf: v.repCpf,
+        cpf: stripMask(v.repCpf),
         rg: v.repRg,
-        contato: { ddd: v.repDdd, telefone: v.repTelefone, email: v.repEmail },
+        contato: { ddd: v.repDdd, telefone: stripMask(v.repTelefone), email: v.repEmail },
         endereco: {
           logradouro: v.repLogradouro,
           numero: v.repNumero,
@@ -244,10 +252,10 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
           bairro: v.repBairro,
           cidade: v.repCidade,
           estado: v.repEstado,
-          cep: v.repCep,
+          cep: stripMask(v.repCep),
         },
       },
-      contato: { ddd: v.ddd, telefone: v.telefone, email: v.emailContato },
+      contato: { ddd: v.ddd, telefone: stripMask(v.telefone), email: v.emailContato },
       endereco: {
         logradouro: v.logradouro,
         numero: v.numero,
@@ -255,10 +263,9 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
         bairro: v.bairro,
         cidade: v.cidade,
         estado: v.estado,
-        cep: v.cep,
+        cep: stripMask(v.cep),
       },
     })
-    await authStore.login(dadosAcesso.value.email, dadosAcesso.value.senha)
     router.push('/dashboard')
   } catch (err) {
     const ax = err as AxiosError<ProblemDetail>
@@ -298,21 +305,21 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
       </CardHeader>
       <CardContent>
         <!-- PASSO 1 -->
-        <form v-if="step === 1" @submit="onStep1" novalidate class="space-y-4">
-          <Alert v-if="error1" variant="destructive" class="mb-4" role="alert">
+        <form v-if="step === 1" @submit="onStep1" novalidate class="space-y-4" data-cy="registro-form-step1">
+          <Alert v-if="error1" variant="destructive" class="mb-4" role="alert" data-cy="registro-error1">
             <AlertDescription>{{ error1 }}</AlertDescription>
           </Alert>
 
           <div class="space-y-2">
             <Label for="email1">E-mail</Label>
-            <Input id="email1" type="email" v-model="email1" v-bind="email1Attrs" placeholder="voce@exemplo.com" autocomplete="email" :aria-invalid="!!form1.errors.value.email" />
+            <Input id="email1" data-cy="registro-email" type="email" v-model="email1" v-bind="email1Attrs" placeholder="voce@exemplo.com" autocomplete="email" :aria-invalid="!!form1.errors.value.email" />
             <p v-if="form1.errors.value.email" class="text-sm text-destructive" role="alert">{{ form1.errors.value.email }}</p>
           </div>
 
           <div class="space-y-2">
             <Label for="senha1">Senha</Label>
             <div class="relative">
-              <Input id="senha1" :type="showSenha1 ? 'text' : 'password'" v-model="senha1" v-bind="senha1Attrs" placeholder="Mínimo 8 caracteres" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.senha" />
+              <Input id="senha1" data-cy="registro-senha" :type="showSenha1 ? 'text' : 'password'" v-model="senha1" v-bind="senha1Attrs" placeholder="Mínimo 8 caracteres" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.senha" />
               <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground" @click="showSenha1 = !showSenha1" :aria-label="showSenha1 ? 'Ocultar senha' : 'Mostrar senha'">
                 <EyeOff v-if="showSenha1" class="size-4" /><Eye v-else class="size-4" />
               </button>
@@ -323,7 +330,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
           <div class="space-y-2">
             <Label for="conf1">Confirmar senha</Label>
             <div class="relative">
-              <Input id="conf1" :type="showConf1 ? 'text' : 'password'" v-model="conf1" v-bind="conf1Attrs" placeholder="Repita a senha" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.confirmacao" />
+              <Input id="conf1" data-cy="registro-confirmacao" :type="showConf1 ? 'text' : 'password'" v-model="conf1" v-bind="conf1Attrs" placeholder="Repita a senha" autocomplete="new-password" class="pr-10" :aria-invalid="!!form1.errors.value.confirmacao" />
               <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground" @click="showConf1 = !showConf1" :aria-label="showConf1 ? 'Ocultar confirmação' : 'Mostrar confirmação'">
                 <EyeOff v-if="showConf1" class="size-4" /><Eye v-else class="size-4" />
               </button>
@@ -331,7 +338,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
             <p v-if="form1.errors.value.confirmacao" class="text-sm text-destructive" role="alert">{{ form1.errors.value.confirmacao }}</p>
           </div>
 
-          <Button type="submit" class="w-full" :disabled="loading1" :aria-busy="loading1">
+          <Button type="submit" class="w-full" :disabled="loading1" :aria-busy="loading1" data-cy="registro-proximo">
             <span v-if="loading1" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
             {{ loading1 ? 'Criando conta...' : 'Próximo' }}
           </Button>
@@ -345,6 +352,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               type="button"
               :variant="tipoPessoa === 'FISICA' ? 'default' : 'outline'"
               class="flex-1"
+              data-cy="tipo-fisica"
               @click="tipoPessoa = 'FISICA'"
             >
               Pessoa Física
@@ -353,13 +361,14 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               type="button"
               :variant="tipoPessoa === 'JURIDICA' ? 'default' : 'outline'"
               class="flex-1"
+              data-cy="tipo-juridica"
               @click="tipoPessoa = 'JURIDICA'"
             >
               Pessoa Jurídica
             </Button>
           </div>
 
-          <Alert v-if="error2" variant="destructive" class="mb-4" role="alert">
+          <Alert v-if="error2" variant="destructive" class="mb-4" role="alert" data-cy="registro-error2">
             <AlertDescription>{{ error2 }}</AlertDescription>
           </Alert>
 
@@ -373,7 +382,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="fCpf">CPF</Label>
-                <Input id="fCpf" v-model="fCpf" v-bind="fCpfAttrs" placeholder="000.000.000-00" />
+                <Input id="fCpf" v-model="fCpf" v-bind="fCpfAttrs" placeholder="000.000.000-00" maxlength="14" @input="maskHandler(fCpf, maskCpf)" />
                 <p v-if="formFisica.errors.value.cpf" class="text-sm text-destructive">{{ formFisica.errors.value.cpf }}</p>
               </div>
               <div class="space-y-2">
@@ -393,7 +402,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="fTelefone">Telefone</Label>
-                <Input id="fTelefone" v-model="fTelefone" v-bind="fTelefoneAttrs" placeholder="99999-9999" />
+                <Input id="fTelefone" v-model="fTelefone" v-bind="fTelefoneAttrs" placeholder="99999-9999" maxlength="10" @input="maskHandler(fTelefone, maskTelefone)" />
                 <p v-if="formFisica.errors.value.telefone" class="text-sm text-destructive">{{ formFisica.errors.value.telefone }}</p>
               </div>
               <div class="space-y-2 sm:col-span-2">
@@ -403,7 +412,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="fCep">CEP</Label>
-                <Input id="fCep" v-model="fCep" v-bind="fCepAttrs" placeholder="00000-000" />
+                <Input id="fCep" v-model="fCep" v-bind="fCepAttrs" placeholder="00000-000" maxlength="9" @input="maskHandler(fCep, maskCep)" />
                 <p v-if="formFisica.errors.value.cep" class="text-sm text-destructive">{{ formFisica.errors.value.cep }}</p>
               </div>
               <div class="space-y-2">
@@ -437,7 +446,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2">
+            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2" data-cy="registro-criar-empresa">
               <span v-if="loading2" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
               {{ loading2 ? 'Criando empresa...' : 'Criar empresa' }}
             </Button>
@@ -459,7 +468,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="jCnpj">CNPJ</Label>
-                <Input id="jCnpj" v-model="jCnpj" v-bind="jCnpjAttrs" placeholder="00.000.000/0000-00" />
+                <Input id="jCnpj" v-model="jCnpj" v-bind="jCnpjAttrs" placeholder="00.000.000/0000-00" maxlength="18" @input="maskHandler(jCnpj, maskCnpj)" />
                 <p v-if="formJuridica.errors.value.cnpj" class="text-sm text-destructive">{{ formJuridica.errors.value.cnpj }}</p>
               </div>
               <div class="space-y-2">
@@ -487,7 +496,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="jTelefone">Telefone empresa</Label>
-                <Input id="jTelefone" v-model="jTelefone" v-bind="jTelefoneAttrs" />
+                <Input id="jTelefone" v-model="jTelefone" v-bind="jTelefoneAttrs" placeholder="99999-9999" maxlength="10" @input="maskHandler(jTelefone, maskTelefone)" />
               </div>
               <div class="space-y-2 sm:col-span-2">
                 <Label for="jEmail">E-mail empresa</Label>
@@ -495,7 +504,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="jCep">CEP empresa</Label>
-                <Input id="jCep" v-model="jCep" v-bind="jCepAttrs" placeholder="00000-000" />
+                <Input id="jCep" v-model="jCep" v-bind="jCepAttrs" placeholder="00000-000" maxlength="9" @input="maskHandler(jCep, maskCep)" />
               </div>
               <div class="space-y-2">
                 <Label for="jNumero">Número</Label>
@@ -532,7 +541,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="jRepCpf">CPF</Label>
-                <Input id="jRepCpf" v-model="jRepCpf" v-bind="jRepCpfAttrs" placeholder="000.000.000-00" />
+                <Input id="jRepCpf" v-model="jRepCpf" v-bind="jRepCpfAttrs" placeholder="000.000.000-00" maxlength="14" @input="maskHandler(jRepCpf, maskCpf)" />
               </div>
               <div class="space-y-2">
                 <Label for="jRepRg">RG</Label>
@@ -544,7 +553,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="jRepTelefone">Telefone</Label>
-                <Input id="jRepTelefone" v-model="jRepTelefone" v-bind="jRepTelefoneAttrs" />
+                <Input id="jRepTelefone" v-model="jRepTelefone" v-bind="jRepTelefoneAttrs" placeholder="99999-9999" maxlength="10" @input="maskHandler(jRepTelefone, maskTelefone)" />
               </div>
               <div class="space-y-2 sm:col-span-2">
                 <Label for="jRepEmail">E-mail do representante</Label>
@@ -552,7 +561,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
               <div class="space-y-2">
                 <Label for="jRepCep">CEP</Label>
-                <Input id="jRepCep" v-model="jRepCep" v-bind="jRepCepAttrs" placeholder="00000-000" />
+                <Input id="jRepCep" v-model="jRepCep" v-bind="jRepCepAttrs" placeholder="00000-000" maxlength="9" @input="maskHandler(jRepCep, maskCep)" />
               </div>
               <div class="space-y-2">
                 <Label for="jRepNumero">Número</Label>
@@ -580,7 +589,7 @@ const onStep2Juridica = formJuridica.handleSubmit(async (v) => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2">
+            <Button type="submit" class="w-full" :disabled="loading2" :aria-busy="loading2" data-cy="registro-criar-empresa">
               <span v-if="loading2" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
               {{ loading2 ? 'Criando empresa...' : 'Criar empresa' }}
             </Button>

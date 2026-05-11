@@ -115,7 +115,7 @@ const percentFields = [
               </div>
             </div>
 
-            <Button type="submit" :disabled="loading" :aria-busy="loading">
+            <Button type="submit" :disabled="loading" :aria-busy="loading" data-cy="fiscal-salvar">
               <span v-if="loading" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
               {{ loading ? 'Salvando...' : 'Salvar' }}
             </Button>

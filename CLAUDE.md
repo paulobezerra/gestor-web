@@ -188,6 +188,25 @@ toast.info('Info')
 ```
 O componente `<Toaster>` está registrado globalmente em `App.vue`.
 
+## Testes E2E (Cypress)
+
+Os testes ponta a ponta ficam em `../gestor-e2e/` e usam atributos `data-cy` para seleção.
+
+**Convenção:** todo elemento crítico para os testes E2E deve ter `data-cy="nome-descritivo"`.
+Nunca remover ou renomear um `data-cy` sem atualizar os testes correspondentes.
+
+Atributos `data-cy` atualmente em uso nos componentes:
+
+| Arquivo | `data-cy` adicionados |
+|---------|----------------------|
+| `LoginPage.vue` | `login-email`, `login-senha`, `login-submit`, `login-error` |
+| `RegistroPage.vue` | `registro-form-step1`, `registro-email`, `registro-senha`, `registro-confirmacao`, `registro-proximo`, `tipo-fisica`, `tipo-juridica`, `registro-criar-empresa`, `registro-error1`, `registro-error2` |
+| `DashboardPage.vue` | `banner-asaas` |
+| `AppLayout.vue` | `nav-{rota}`, `nav-configuracoes`, `nav-configuracoes-{subitem}`, `logout-btn` |
+| `configuracoes/AsaasPage.vue` | `asaas-status` (+ `data-status`), `asaas-salvar` |
+| `configuracoes/FiscalPage.vue` | `fiscal-salvar` |
+| `configuracoes/UsuariosPage.vue` | `criar-colaborador-btn`, `criar-colaborador-submit`, `colaborador-row-{email}` |
+
 ## Princípios
 
 - Acessibilidade: `<label for="id">` em todos os campos, `aria-invalid`, `aria-describedby` nos erros, `aria-label` em botões só-ícone
@@ -195,3 +214,4 @@ O componente `<Toaster>` está registrado globalmente em `App.vue`.
 - Sem CSS manual — apenas classes Tailwind e componentes shadcn-vue
 - Loading state em todo botão que dispara HTTP: spinner + `disabled` + `aria-busy`
 - Ações destrutivas pedem confirmação via `AlertDialog`
+- Testabilidade: elementos críticos têm `data-cy` — nunca remover sem atualizar os testes E2E

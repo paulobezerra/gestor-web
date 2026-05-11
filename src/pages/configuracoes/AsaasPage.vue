@@ -89,7 +89,7 @@ const statusConfig = {
         <CardContent class="space-y-6">
           <!-- Status atual -->
           <div v-if="loadingStatus" class="text-sm text-muted-foreground">Verificando status...</div>
-          <div v-else class="flex items-center gap-3">
+          <div v-else class="flex items-center gap-3" data-cy="asaas-status" :data-status="status">
             <component
               :is="statusConfig[status].icon"
               :class="['size-6', statusConfig[status].class]"
@@ -138,6 +138,7 @@ const statusConfig = {
             type="button"
             :disabled="loading || !apiKey.trim()"
             :aria-busy="loading"
+            data-cy="asaas-salvar"
             @click="testarESalvar"
           >
             <span v-if="loading" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />

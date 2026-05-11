@@ -197,7 +197,7 @@ const rolesDisponiveis: Role[] = ['FINANCEIRO', 'TECNICO', 'RECEPCAO']
     <div class="p-6">
       <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 class="text-2xl font-bold">Usuários</h1>
-        <Button @click="criarOpen = true">
+        <Button @click="criarOpen = true" data-cy="criar-colaborador-btn">
           <Plus class="mr-2 size-4" />
           Novo usuário
         </Button>
@@ -235,7 +235,7 @@ const rolesDisponiveis: Role[] = ['FINANCEIRO', 'TECNICO', 'RECEPCAO']
             <TableRow v-else-if="filtrados.length === 0">
               <TableCell colspan="5" class="text-center text-muted-foreground">Nenhum usuário encontrado.</TableCell>
             </TableRow>
-            <TableRow v-for="c in filtrados" :key="c.id">
+            <TableRow v-for="c in filtrados" :key="c.id" :data-cy="`colaborador-row-${c.email}`">
               <TableCell class="font-medium">{{ c.nome }}</TableCell>
               <TableCell>{{ c.email }}</TableCell>
               <TableCell>
@@ -305,7 +305,7 @@ const rolesDisponiveis: Role[] = ['FINANCEIRO', 'TECNICO', 'RECEPCAO']
           </div>
           <DialogFooter>
             <Button variant="outline" @click="criarOpen = false">Cancelar</Button>
-            <Button @click="criarUsuario" :disabled="criarLoading" :aria-busy="criarLoading">
+            <Button @click="criarUsuario" :disabled="criarLoading" :aria-busy="criarLoading" data-cy="criar-colaborador-submit">
               <span v-if="criarLoading" class="mr-2 inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
               {{ criarLoading ? 'Criando...' : 'Criar' }}
             </Button>

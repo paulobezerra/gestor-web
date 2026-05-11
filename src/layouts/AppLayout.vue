@@ -118,6 +118,7 @@ function navigate(to: string) {
                   ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               "
+              :data-cy="`nav-${item.to.replace(/\//g, '').replace(/\//g, '-')}`"
               @click="navigate(item.to)"
             >
               <component :is="item.icon" class="size-4 flex-shrink-0" aria-hidden="true" />
@@ -133,6 +134,7 @@ function navigate(to: string) {
             <button
               type="button"
               class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              data-cy="nav-configuracoes"
               @click="configOpen = !configOpen"
               :aria-expanded="configOpen"
             >
@@ -154,6 +156,7 @@ function navigate(to: string) {
                       ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium'
                       : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                   "
+                  :data-cy="`nav-${item.to.replace(/\//g, '-').replace(/^-/, '')}`"
                   @click="navigate(item.to)"
                 >
                   <component :is="item.icon" class="size-4 flex-shrink-0" aria-hidden="true" />
@@ -253,7 +256,7 @@ function navigate(to: string) {
               Perfil
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="text-destructive focus:text-destructive" @click="logout">
+            <DropdownMenuItem class="text-destructive focus:text-destructive" @click="logout" data-cy="logout-btn">
               <LogOut class="mr-2 size-4" />
               Sair
             </DropdownMenuItem>

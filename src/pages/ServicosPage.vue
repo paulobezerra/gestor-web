@@ -63,7 +63,7 @@ import type { ProblemDetail } from '@/types/api'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
-const podeEditar = computed(() => authStore.hasRole('SUPERUSUARIO', 'ADMINISTRADOR', 'FINANCEIRO'))
+const podeEditar = computed(() => authStore.hasRole('ADMINISTRADOR', 'FINANCEIRO'))
 
 // ---------- Listagem ----------
 const servicos = ref<ServicoResp[]>([])
@@ -156,7 +156,7 @@ const salvarForm = handleSubmit(async (values) => {
   formError.value = null
   try {
     const payload = {
-      nome: values.nome,
+      nome: values.nome as string,
       descricao: values.descricao || undefined,
       precoBase: values.precoBase as number,
       duracaoMinutos: values.duracaoMinutos as number,

@@ -166,16 +166,14 @@ const salvarForm = handleSubmit(async (values) => {
     }
 
     if (editandoId.value) {
-      const { data } = await atualizarServico(editandoId.value, payload)
-      const idx = servicos.value.findIndex((s) => s.id === data.id)
-      if (idx !== -1) servicos.value[idx] = data
+      await atualizarServico(editandoId.value, payload)
       toast.success('Serviço atualizado.')
     } else {
-      const { data } = await criarServico(payload)
-      servicos.value.unshift(data)
+      await criarServico(payload)
       toast.success('Serviço criado.')
     }
     formOpen.value = false
+    await fetchServicos()
   } catch (err) {
     const ax = err as AxiosError<ProblemDetail>
     formError.value = ax.response?.data?.detail ?? 'Erro ao salvar serviço.'
@@ -197,13 +195,11 @@ function confirmarToggle(s: ServicoResp) {
 async function executarToggle() {
   if (!toggleTarget.value) return
   toggleLoading.value = true
+  const novoStatus = !toggleTarget.value.ativo
   try {
-    const { data } = await alterarStatusServico(toggleTarget.value.id, {
-      ativo: !toggleTarget.value.ativo,
-    })
-    const idx = servicos.value.findIndex((s) => s.id === data.id)
-    if (idx !== -1) servicos.value[idx] = data
-    toast.success(data.ativo ? 'Serviço ativado.' : 'Serviço desativado.')
+    await alterarStatusServico(toggleTarget.value.id, { ativo: novoStatus })
+    toast.success(novoStatus ? 'Serviço ativado.' : 'Serviço desativado.')
+    await fetchServicos()
   } catch (err) {
     const ax = err as AxiosError<ProblemDetail>
     toast.error(ax.response?.data?.detail ?? 'Erro ao alterar status.')
